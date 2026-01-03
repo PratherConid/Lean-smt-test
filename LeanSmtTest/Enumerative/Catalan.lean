@@ -35,7 +35,7 @@ theorem catalan_succ''' (n : ℕ) :
 theorem catalan_succ'''' (n : ℕ) :
     catalan (n + 1) = ∑ ij ∈ antidiagonal n, catalan ij.1 * catalan ij.2 := by
   rw [Nat.sum_antidiagonal_eq_sum_range_succ (fun x y => catalan x * catalan y) n]
-  auto [catalan_succ,sum_range]
+  auto [catalan_succ, sum_range]
 
 
 private def gosperCatalan (n j : ℕ) : ℚ :=
@@ -51,7 +51,7 @@ set_option pp.rawOnError true
 theorem catalan_eq_centralBinom_div' (n : ℕ) : catalan n = n.centralBinom / (n + 1) := by
   suffices (catalan n : ℚ) = Nat.centralBinom n / (n + 1) by
     have h := Nat.succ_dvd_centralBinom n
-    auto [mod_cast]
+    auto
   induction n using Nat.caseStrongRecOn with
   | zero => simp
   | ind d hd =>

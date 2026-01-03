@@ -3,12 +3,24 @@ import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.Nat.Choose.Multinomial
 import Mathlib.Data.Nat.Choose.Mul
 import Smt
+import Auto.Tactic
+import Duper.Tactic
+
+open Lean Auto in
+def Auto.duperRaw (lemmas : Array Lemma) (inhs : Array Lemma) : MetaM Expr := do
+  let lemmas : Array (Expr × Expr × Array Name × Bool) ← lemmas.mapM
+    (fun ⟨⟨proof, ty, _⟩, _⟩ => do return (ty, ← Meta.mkAppM ``eq_true #[proof], #[], true))
+  Duper.runDuper lemmas.toList [] 0
+
+set_option auto.mono.ignoreNonQuasiHigherOrder true
+attribute [rebind Auto.Native.solverFunc] Auto.duperRaw
+set_option auto.native true
+set_option auto.smt false
+set_option auto.tptp false
 
 open Multiset Nat
 
 namespace Multiset
-
-
 
 private theorem bell_mul_eq_lemma {x : ℕ} (hx : x ≠ 0) :
     ∀ c, x ! ^ c * c ! * ∏ j ∈ Finset.range c, (j * x + x - 1).choose (x - 1) = (x * c)!
@@ -85,7 +97,7 @@ theorem bell_mul_eq''' (m : Multiset ℕ) :
   · rw [mul_comm, mul_assoc, ← Finset.prod_mul_distrib, Finset.prod_multiset_map_count]
     suffices this : _ by
       by_cases hm : 0 ∈ m.toFinset
-      · auto [Finset.prod_erase_mul,factorial_zero,one_pow, mul_one, zero_mul,hm]
+      · auto [*, Finset.prod_erase_mul,factorial_zero,one_pow, mul_one, zero_mul,hm]
 
 
 namespace Nat
